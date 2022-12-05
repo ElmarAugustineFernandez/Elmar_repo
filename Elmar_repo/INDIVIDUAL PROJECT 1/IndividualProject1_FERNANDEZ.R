@@ -49,12 +49,12 @@ setup_twitter_oauth(consumer_key = CONSUMER_KEY,
 #Getting a data
 #it would take few minutes to load which depend the number of data you need
 #but when you already save this data as a file you can skip this part.
-trendTweets <- searchTwitter("#ITZY -filter:retweets",
+trendTweets <- searchTwitter("#christmas -filter:retweets",
                              n = 10000,
                              lang = "en",
-                             since = "2022-08-01",
-                             until = "2022-12-03",
-                             retryOnRateLimit=1000)
+                             since = "2022-11-02",
+                             until = "2022-11-29",
+                             retryOnRateLimit=120)
 trendTweets
 
 #===============================================================================
@@ -94,7 +94,7 @@ save(tweetsDF, file = "tweetsDF.Rdata")
 #plotting time series graph using ts_plot() by rtweet package
 ts_plot(tweetsDF, "hours") +
   labs(x = NULL, y = NULL,
-       title = "Frequency of tweets with a #ITZY",
+       title = "Frequency of tweets with a #christmas",
        subtitle = paste0(format(min(tweetsDF$created), "%d %B %Y"), " to ", 
                          format(max(tweetsDF$created),"%d %B %Y")),
        caption = "Data collected from Twitter's REST API via twitteR") +
