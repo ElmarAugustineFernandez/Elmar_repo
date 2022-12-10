@@ -1,0 +1,138 @@
+---
+title: "INDIVIDUAL PROJECT 2"
+author: "ELMAR AUGUSTINE FERNANDEZ"
+date: "2022-12-10"
+output: html_document
+---
+
+```{r}
+library(wordcloud)
+library(plotly)
+library(tm)
+library(dplyr)
+library(RColorBrewer)
+library(ggplot2)
+library(twitteR)
+```
+
+
+# SETUP CREDENTIALS.
+```{r}
+CONSUMER_KEY <- "7KrD22KUMcdamkdHgR3WOA2QP"
+CONSUMER_SECRET <- "hGbT8EMCtDRvK79NXHTteGl1YvIz9xenZX8qvWjN8SAIKCO7nD"
+ACCESS_TOKEN <-  "1596512522408202240-kEkdMunH6t5SpjneM0fjsUURFvlY0c"
+ACCESS_SECRET <-  "U7h5Y2P8JyblzoxX6Zc0hzK5tQpMYYGj6iesEzMU0P54z"
+```
+
+
+#Connect to twitter app.
+```{r}
+setup_twitter_oauth(consumer_key = CONSUMER_KEY,
+                    consumer_secret = CONSUMER_SECRET,
+                    access_token = ACCESS_TOKEN,
+                    access_secret = ACCESS_SECRET)
+
+```
+
+# EXTRACTING TWEETS.
+```{r}
+Footballtweets <- searchTwitter("#Messi", n=10000, lang="en", since="2022-11-25", until="2022-12-08", retryOnRateLimit = 120)
+Footballtweets
+```
+
+
+# CONVERTING LIST DATA TO DATA FRAME.
+```{r}
+FootballtweetsDF <- twListToDF(Footballtweets)
+```
+
+
+# SAVE DATA FRAME FILE.
+```{r}
+save(FootballtweetsDF,file = "FootballTweetsDF.Rdata")
+```
+
+
+# LOAD DATA FRAME FILE.
+```{r}
+load(file = "FootballTweetsDF.Rdata")
+```
+
+
+# CHECKING FOR MISSING VALUES IN A DATA FRAME.
+```{r}
+sap_data <- sapply(FootballtweetsDF, function(x) sum(is.na(x)))
+sap_data
+```
+
+
+#Tweets
+# SUBSETTING USING THE dplyr() PACKAGE.
+```{r}
+tweets <- FootballtweetsDF %>%
+  select(screenName,text,created, isRetweet) %>% filter(isRetweet == FALSE)
+tweets
+```
+
+
+# GROUPING THE DATA CREATED. 
+```{r}
+tweets %>%  
+  group_by(1) %>%  
+  summarise(max = max(created), min = min(created))
+
+crt_data <- tweets %>%  mutate(Created_At_Round = created %>% round(units = 'hours') %>% as.POSIXct())
+crt_data
+
+mn <- tweets %>% pull(created) %>% min()
+mn 
+mx <- tweets %>% pull(created) %>% max()
+mx
+```
+
+
+# Plot on tweets by time using the library(plotly) and ggplot().
+```{r}
+plt_data <- ggplot(crt_data, aes(x = Created_At_Round)) +
+  geom_histogram(aes(fill = ..count..)) +
+  theme(legend.position = "right") +
+  xlab("Time") + ylab("Number of tweets") + 
+  scale_fill_gradient(low = "green", high = "yellow")
+
+plt_data %>% ggplotly()
+
+```
+
+#Retweets
+
+```{r}
+sub_tweets <- FootballtweetsDF %>%
+  select(screenName,text,created, isRetweet) %>% filter(isRetweet == TRUE)
+sub_tweets
+
+
+sub_tweets %>%  
+  group_by(1) %>%  
+  summarise(max = max(created), min = min(created))
+
+crt2 <- sub_tweets %>%  mutate(Created_At_Round = created %>% round(units = 'hours') %>% as.POSIXct())
+crt2
+
+mn <- sub_tweets %>% pull(created) %>% min()
+mn 
+mx <- sub_tweets %>% pull(created) %>% max()
+mx
+```
+
+
+# Plot on tweets by time using the library(plotly) and ggplot().
+```{r}
+plt_data <- ggplot(crt2, aes(x = Created_At_Round)) +
+  geom_histogram(aes(fill = ..count..)) +
+  theme(legend.position = "right") +
+  xlab("Time") + ylab("Number of tweets") + 
+  scale_fill_gradient(low = "green", high = "yellow")
+
+plt_data %>% ggplotly()
+```
+
